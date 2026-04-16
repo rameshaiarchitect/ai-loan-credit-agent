@@ -37,7 +37,16 @@ Loan Service → Kafka → Credit Agent → Decision
 
 ------------------------------------------------------------------------
 
-## ▶️ Run Application
+## ▶️ Setup & Run Application
+
+### 1. Install Dependencies
+
+Ensure `uv` is installed, then run:
+
+```bash
+uv sync
+
+### 2. Run Application
 
 ``` bash
 uv run uvicorn app.main:app --reload
