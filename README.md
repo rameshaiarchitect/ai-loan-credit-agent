@@ -89,13 +89,13 @@ uv run pytest
 ## 📊 Code Coverage
 
 ``` bash
-PYTHONPATH=. uv run pytest --cov=app
+uv run pytest --cov=app
 ```
 
 Optional HTML report:
 
 ``` bash
-PYTHONPATH=. uv run pytest --cov=app --cov-report=html
+uv run pytest --cov=app --cov-report=html
 ```
 
 ------------------------------------------------------------------------
