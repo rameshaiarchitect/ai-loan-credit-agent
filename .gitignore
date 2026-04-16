@@ -26,3 +26,5 @@ replay_pid*
 __pycache__/
 *.pyc
 .env
+.coverage
+coverage.xml

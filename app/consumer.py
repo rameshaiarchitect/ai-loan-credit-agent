@@ -1,4 +1,8 @@
 from kafka import KafkaConsumer
+from app.decision import decide
+
+def process_message(message_value: str) -> str:
+    return decide(message_value)
 
 def create_consumer():
     return KafkaConsumer(
@@ -10,21 +14,18 @@ def create_consumer():
         value_deserializer=lambda x: x.decode("utf-8")
     )
 
-
 def consume_events():
     consumer = create_consumer()
 
     print("Credit Agent started listening...")
 
-    # Initial poll to trigger partition assignment
     consumer.poll(timeout_ms=1000)
 
     while True:
         records = consumer.poll(timeout_ms=2000)
 
-        for tp, msgs in records.items():
+        for _, msgs in records.items():
             for message in msgs:
                 print(f"Received event: {message.value}")
-
-                decision = "APPROVED" if "amount" in message.value else "REJECTED"
+                decision = process_message(message.value)
                 print(f"Decision: {decision}")
