@@ -45,6 +45,7 @@ Ensure `uv` is installed, then run:
 
 ```bash
 uv sync
+```
 
 ### 2. Run Application
 
