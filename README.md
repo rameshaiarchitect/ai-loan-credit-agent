@@ -81,7 +81,7 @@ The service includes unit tests for core logic.
 ## ▶️ Run Tests
 
 ``` bash
-PYTHONPATH=. uv run pytest
+uv run pytest
 ```
 
 ------------------------------------------------------------------------
