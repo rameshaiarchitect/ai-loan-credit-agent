@@ -1,9 +1,31 @@
-from app.decision import decide
+from app.decision import evaluate
 
-def test_decide_approved():
-    msg = "LoanRequest(applicationId=1, amount=1000, salary=2000)"
-    assert decide(msg) == "APPROVED"
 
-def test_decide_rejected():
+def test_high_salary_approved():
+    msg = "LoanRequest(applicationId=1, amount=20000, salary=10000)"
+    result = evaluate(msg)
+
+    assert result["decision"] == "APPROVED"
+    assert result["risk_score"] < 0.5
+
+
+def test_high_amount_rejected():
+    msg = "LoanRequest(applicationId=1, amount=60000, salary=10000)"
+    result = evaluate(msg)
+
+    assert result["decision"] == "REJECTED"
+    assert result["risk_score"] > 0.8
+
+
+def test_medium_case_approved():
+    msg = "LoanRequest(applicationId=1, amount=10000, salary=5000)"
+    result = evaluate(msg)
+
+    assert result["decision"] == "APPROVED"
+
+
+def test_invalid_message():
     msg = "invalid_message"
-    assert decide(msg) == "REJECTED"
+    result = evaluate(msg)
+
+    assert result["decision"] == "REJECTED"

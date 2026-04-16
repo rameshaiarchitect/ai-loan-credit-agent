@@ -1,8 +1,9 @@
 from kafka import KafkaConsumer
-from app.decision import decide
+from app.decision import evaluate
 
-def process_message(message_value: str) -> str:
-    return decide(message_value)
+def process_message(message_value: str):
+    return evaluate(message_value)
+
 
 def create_consumer():
     return KafkaConsumer(
@@ -13,6 +14,7 @@ def create_consumer():
         group_id="credit-agent-group-v3",
         value_deserializer=lambda x: x.decode("utf-8")
     )
+
 
 def consume_events():
     consumer = create_consumer()
@@ -26,6 +28,11 @@ def consume_events():
 
         for _, msgs in records.items():
             for message in msgs:
+                result = process_message(message.value)
+
                 print(f"Received event: {message.value}")
-                decision = process_message(message.value)
-                print(f"Decision: {decision}")
+                print(
+                    f"Decision: {result['decision']}, "
+                    f"Risk: {result['risk_score']}, "
+                    f"Reason: {result['reason']}"
+                )
