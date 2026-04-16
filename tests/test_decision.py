@@ -1,4 +1,4 @@
-from app.decision import evaluate
+from app.graph import evaluate
 
 
 def test_high_salary_approved():

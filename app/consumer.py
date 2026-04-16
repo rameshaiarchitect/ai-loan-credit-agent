@@ -1,5 +1,6 @@
 from kafka import KafkaConsumer
-from app.decision import evaluate
+from app.graph import evaluate
+
 
 def process_message(message_value: str):
     return evaluate(message_value)
