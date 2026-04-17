@@ -54,6 +54,9 @@ def compliance_agent(data: dict):
     return {"compliance_flag": True}
 
 
+from app.llm import get_llm
+
+
 def decision_agent(data: dict):
     if "amount" not in data or "salary" not in data:
         return {
@@ -61,33 +64,58 @@ def decision_agent(data: dict):
             "reason": "Invalid input"
         }
 
-    # Fraud has highest priority
-    if data.get("fraud_flag", False):
-        return {
-            "decision": "REJECTED",
-            "reason": "Fraud detected"
-        }
-        
-    # Compliance check
-    if not data.get("compliance_flag", True):
-        return {
-            "decision": "REJECTED",
-            "reason": "Compliance check failed"
-        }
+    if data.get("test_mode"):
+        if data.get("fraud_flag"):
+            return {"decision": "REJECTED", "reason": "Fraud detected"}
 
-    if data.get("risk_score", 1.0) >= 0.8:
-        return {
-            "decision": "REJECTED",
-            "reason": "High risk"
-        }
+        if not data.get("compliance_flag", True):
+            return {"decision": "REJECTED", "reason": "Compliance check failed"}
 
-    if data.get("risk_score", 1.0) <= 0.4:
-        return {
-            "decision": "APPROVED",
-            "reason": "Low risk"
-        }
+        if data.get("risk_score", 1.0) <= 0.4:
+            return {"decision": "APPROVED", "reason": "Low risk"}
+
+        return {"decision": "REJECTED", "reason": "High risk"}
+
+    # LLM mode
+    llm = get_llm()
+
+    prompt = f"""
+    You are a credit decision system.
+
+    Input:
+    - Amount: {data.get('amount')}
+    - Salary: {data.get('salary')}
+    - Risk Score: {data.get('risk_score')}
+    - Fraud Flag: {data.get('fraud_flag')}
+    - Compliance Flag: {data.get('compliance_flag')}
+
+    Rules:
+    - If fraud_flag is True → REJECT
+    - If compliance_flag is False → REJECT
+    - Otherwise consider risk_score:
+        - <= 0.4 → APPROVE
+        - > 0.4 → REJECT
+
+    Respond ONLY in format:
+    Decision: <APPROVED/REJECTED>
+    Reason: <short explanation>
+    """
+
+    response = llm.invoke(prompt).content
+
+    decision = "REJECTED"
+    reason = "Unknown"
+
+    for line in response.splitlines():
+        line = line.strip()
+
+        if line.lower().startswith("decision:"):
+            decision = line.split(":", 1)[1].strip().upper()
+
+        elif line.lower().startswith("reason:"):
+            reason = line.split(":", 1)[1].strip()
 
     return {
-        "decision": "REJECTED",
-        "reason": "Medium risk"
+        "decision": decision,
+        "reason": reason
     }

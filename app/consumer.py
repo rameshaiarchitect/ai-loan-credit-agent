@@ -2,8 +2,8 @@ from kafka import KafkaConsumer
 from app.graph import evaluate
 
 
-def process_message(message_value: str):
-    return evaluate(message_value)
+def process_message(message_value: str, test_mode: bool = False):
+    return evaluate(message_value, test_mode=test_mode)
 
 
 def create_consumer():

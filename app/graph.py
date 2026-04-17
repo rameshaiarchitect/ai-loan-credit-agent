@@ -11,6 +11,7 @@ class LoanState(TypedDict, total=False):
     fraud_flag: bool
     decision: str
     reason: str
+    test_mode: bool
 
 
 # --- Nodes ---
@@ -73,10 +74,13 @@ def build_graph():
 
 # --- Public API ---
 
-def evaluate(message: str):
+def evaluate(message: str, test_mode: bool = False):
     graph = build_graph()
 
-    result = graph.invoke({"message": message})
+    result = graph.invoke({
+        "message": message,
+        "test_mode": test_mode   # 👈 ADD THIS
+    })
 
     return {
         "decision": result.get("decision", "REJECTED"),
