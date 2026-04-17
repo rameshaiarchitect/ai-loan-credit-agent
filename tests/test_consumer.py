@@ -21,3 +21,10 @@ def test_fraud_rejected():
 
     assert result["decision"] == "REJECTED"
     assert result["reason"] == "Fraud detected"
+    
+def test_compliance_rejected():
+    msg = "LoanRequest(applicationId=1, amount=80000, salary=20000)"
+    result = process_message(msg)
+
+    assert result["decision"] == "REJECTED"
+    assert result["reason"] == "Fraud detected"
