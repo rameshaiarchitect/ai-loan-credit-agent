@@ -41,8 +41,20 @@ def fraud_agent(data: dict):
     return {"fraud_flag": False}
 
 
-def decision_agent(data: dict):
+def compliance_agent(data: dict):
+    # Simulate AML / KYC rules
+    if "amount" not in data:
+        return {"compliance_flag": False}
 
+    # Example rule: very high transactions need manual review
+    if data["amount"] > 75000:
+        return {"compliance_flag": False}
+
+    # Otherwise compliant
+    return {"compliance_flag": True}
+
+
+def decision_agent(data: dict):
     if "amount" not in data or "salary" not in data:
         return {
             "decision": "REJECTED",
@@ -54,6 +66,13 @@ def decision_agent(data: dict):
         return {
             "decision": "REJECTED",
             "reason": "Fraud detected"
+        }
+        
+    # Compliance check
+    if not data.get("compliance_flag", True):
+        return {
+            "decision": "REJECTED",
+            "reason": "Compliance check failed"
         }
 
     if data.get("risk_score", 1.0) >= 0.8:

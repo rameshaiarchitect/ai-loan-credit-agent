@@ -1,7 +1,7 @@
 from langgraph.graph import StateGraph
 from typing import TypedDict
 
-from app.decision import parse_agent, risk_agent, fraud_agent, decision_agent
+from app.decision import parse_agent, risk_agent, fraud_agent, decision_agent, compliance_agent
 
 class LoanState(TypedDict, total=False):
     message: str
@@ -34,6 +34,13 @@ def fraud_node(state: LoanState):
 def decision_node(state: LoanState):
     return decision_agent(state)
 
+def merge_node(state: LoanState):
+    # just pass state forward (ensures synchronization)
+    return {}
+
+def compliance_node(state: LoanState):
+    return compliance_agent(state)
+
 
 # --- Graph ---
 
@@ -44,16 +51,22 @@ def build_graph():
     graph.add_node("risk", risk_node)
     graph.add_node("fraud", fraud_node)
     graph.add_node("decision", decision_node)
+    graph.add_node("merge", merge_node)
+    graph.add_node("compliance", compliance_node)
 
     graph.set_entry_point("parse")
 
     # Parallel execution
     graph.add_edge("parse", "risk")
     graph.add_edge("parse", "fraud")
+    graph.add_edge("parse", "compliance")
 
     # Merge into decision
-    graph.add_edge("risk", "decision")
-    graph.add_edge("fraud", "decision")
+    graph.add_edge("risk", "merge")
+    graph.add_edge("fraud", "merge")
+    graph.add_edge("compliance", "merge")
+
+    graph.add_edge("merge", "decision")
 
     return graph.compile()
 
