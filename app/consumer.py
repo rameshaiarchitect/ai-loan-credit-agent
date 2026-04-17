@@ -1,12 +1,29 @@
-from kafka import KafkaConsumer
-from app.graph import evaluate
+from app.agents import parse_agent, risk_agent, fraud_agent, compliance_agent
+from app.decision import decision_agent
 
 
 def process_message(message_value: str, test_mode: bool = False):
-    return evaluate(message_value, test_mode=test_mode)
+
+    # ✅ TEST MODE → deterministic pipeline (NO GRAPH)
+    if test_mode:
+        data = parse_agent(message_value)
+
+        data.update(risk_agent(data))
+        data.update(fraud_agent(data))
+        data.update(compliance_agent(data))
+
+        data["test_mode"] = True
+
+        return decision_agent(data)
+
+    # ✅ NORMAL FLOW (Graph)
+    from app.graph import evaluate
+    return evaluate(message_value)
 
 
 def create_consumer():
+    from kafka import KafkaConsumer
+
     return KafkaConsumer(
         "loan.application.submitted",
         bootstrap_servers="localhost:9092",
@@ -34,6 +51,6 @@ def consume_events():
                 print(f"Received event: {message.value}")
                 print(
                     f"Decision: {result['decision']}, "
-                    f"Risk: {result['risk_score']}, "
+                    f"Risk: {result.get('risk_score', 'NA')}, "
                     f"Reason: {result['reason']}"
                 )
