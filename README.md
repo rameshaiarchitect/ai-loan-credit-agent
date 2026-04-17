@@ -1,118 +1,123 @@
-# Credit Agent
+# Credit Agent – AI Loan Decision System
 
-AI-based microservice responsible for evaluating loan applications and
-determining credit decisions.
+AI-powered microservice that evaluates loan applications using a hybrid architecture combining deterministic rules and LLM-based reasoning.
 
-------------------------------------------------------------------------
+---
 
-## Responsibilities
+## Overview
 
--   Consume loan application events from Kafka
--   Evaluate credit risk based on incoming data
--   Generate decision (APPROVED / REJECTED)
--   Print or publish results for downstream processing
+This service is part of an event-driven system where loan applications are processed and evaluated using:
 
-------------------------------------------------------------------------
+- Rule-based agents (risk, fraud, compliance)
+- LangGraph orchestration
+- LLM-based decision reasoning
 
-## Flow
+---
+
+## Architecture
 
 Loan Service → Kafka → Credit Agent → Decision
+                         ↓
+                  LangGraph Flow
+                         ↓
+     Risk Agent | Fraud Agent | Compliance Agent
+                         ↓
+                 Decision Agent (LLM)
+                         ↓
+                    Final Decision
 
-------------------------------------------------------------------------
+---
+
+## Key Features
+
+### Multi-Agent System (LangGraph)
+
+- Parallel execution of:
+  - Risk evaluation
+  - Fraud detection
+  - Compliance checks
+
+### Hybrid AI Decision Engine
+
+- Deterministic rules:
+  - Fraud → immediate rejection
+  - Compliance failure → immediate rejection
+
+- LLM reasoning:
+  - Final decision based on risk score
+  - Structured output using Pydantic
+
+### Production-Ready Design
+
+- Separation of concerns:
+  - agents.py → business logic
+  - graph.py → orchestration
+  - decision.py → LLM reasoning
+- Deterministic testing (no LLM dependency)
+- Structured LLM output
+
+---
 
 ## Tech Stack
 
--   Python 3.11+
--   FastAPI
--   Kafka (kafka-python)
--   Uvicorn
+- Python 3.11+
+- FastAPI
+- Kafka (kafka-python)
+- LangGraph
+- LangChain
+- OpenAI (GPT-4o-mini)
+- Pydantic
 
-------------------------------------------------------------------------
+---
 
-## Kafka Integration
+## Setup & Run
 
--   Topic Consumed: `loan.application.submitted`
--   Consumer Group: `credit-agent-group`
--   Message Format: String (LoanRequest)
+### Install Dependencies
 
-------------------------------------------------------------------------
-
-## ▶️ Setup & Run Application
-
-### 1. Install Dependencies
-
-Ensure `uv` is installed, then run:
-
-```bash
 uv sync
-```
 
-### 2. Run Application
+### Run Application
 
-``` bash
 uv run uvicorn app.main:app --reload
-```
 
-------------------------------------------------------------------------
+---
 
-## Logs
+## Testing
 
-On successful consumption:
-
-    Credit Agent started listening...
-    Received event: LoanRequest(applicationId=..., amount=..., salary=...)
-    Decision: APPROVED
-
-------------------------------------------------------------------------
-
-## 🧪 Testing
-
-The service includes unit tests for core logic.
-
-### Test Coverage
-
--   Decision logic (approval/rejection)
--   Consumer message processing
--   API health endpoint
--   Model validation
-
-------------------------------------------------------------------------
-
-## ▶️ Run Tests
-
-``` bash
 uv run pytest
-```
 
-------------------------------------------------------------------------
+---
 
-## 📊 Code Coverage
+## Coverage
 
-``` bash
 uv run pytest --cov=app
-```
 
-Optional HTML report:
+---
 
-``` bash
-uv run pytest --cov=app --cov-report=html
-```
+## Design Decisions
 
-------------------------------------------------------------------------
+- Avoided tool-based agents for strict financial rules
+- Used deterministic agents for reliability
+- Used LLM only for reasoning
 
-## Notes
-
--   Uses event-driven architecture
--   Consumer runs in background thread using FastAPI lifespan
--   Kafka connectivity supports local Docker setup
--   Designed for scalability and extension with AI/ML models
-
-------------------------------------------------------------------------
+---
 
 ## Future Enhancements
 
--   Replace string parsing with JSON payload
--   Implement real credit scoring logic
--   Publish decision to Kafka (new topic)
--   Store decisions in database
--   Add retry and error handling
+- JSON-based Kafka messages
+- Kafka decision publishing
+- Database integration
+- RAG integration
+- Observability (metrics, tracing)
+- SonarQube integration
+
+---
+
+## Summary
+
+This project demonstrates:
+
+- AI-native system design
+- Multi-agent orchestration
+- Hybrid decision systems
+- Production-ready LLM usage
